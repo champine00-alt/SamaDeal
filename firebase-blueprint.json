@@ -2,25 +2,30 @@
   "entities": {
     "user": {
       "title": "User",
-      "description": "User profile information",
+      "description": "User profile information with Senegal SamaDeal role and verification statuses",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
+        "displayName": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["acheteur", "vendeur", "admin"] },
         "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "city": { "type": "string" },
+        "neighborhood": { "type": "string" },
+        "avatar": { "type": "string" },
         "emailVerified": { "type": "boolean" },
         "whatsappVerified": { "type": "boolean" },
-        "city": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "number" }
       },
-      "required": ["uid", "name", "email", "phone"]
+      "required": ["uid", "email"]
     }
   },
   "firestore": {
     "/users/{uid}": {
       "schema": "user",
-      "description": "User document"
+      "description": "User document containing account and verification details"
     }
   }
 }

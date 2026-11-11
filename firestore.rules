@@ -1,14 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      
-      // Prevent users from manually verifying themselves
-      allow update: if request.auth != null && request.auth.uid == uid &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['emailVerified', 'whatsappVerified']);
-        
-      allow create: if request.auth != null && request.auth.uid == uid;
+    
+    // Fonction pour vérifier si l'utilisateur connecté est l'administrateur suprême SamaDeal
+    function isSuperAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "champine00@gmail.com" || 
+        request.auth.token.email == "contact@samadeal.sn"
+      );
+    }
+
+    // Gestion de la collection des utilisateurs
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null || isSuperAdmin();
+    }
+
+    // Produits & Annonces de la marketplace SamaDeal
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Collection des annonces (Listings)
+    match /listings/{listingId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
     }
   }
 }

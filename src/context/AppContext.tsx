@@ -32,7 +32,7 @@ import {
   signInWithPopup,
   User as FirebaseUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 export type SortOption = 'latest' | 'price_asc' | 'price_desc' | 'popular';
 export type ActiveTab = 'home' | 'explore' | 'messages' | 'profile' | 'admin';
@@ -92,6 +92,7 @@ interface AppContextType {
     email: string;
     password: string;
     city: string;
+    role?: 'acheteur' | 'vendeur' | 'admin';
     neighborhood?: string;
     avatar?: string;
   }) => Promise<void>;
@@ -142,6 +143,8 @@ interface AppContextType {
   logoutAdmin: () => void;
   toggleUserVerification: (userId: string) => void;
   toggleUserBlocked: (userId: string) => void;
+  adminDeleteUser: (userId: string, email?: string) => Promise<void>;
+  refreshUsersFromFirestore: () => Promise<void>;
   adminDeleteListing: (listingId: string) => void;
   adminToggleBoost: (listingId: string) => void;
   releaseEscrowFunds: (paymentId: string) => void;
@@ -525,6 +528,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     email: string;
     password: string;
     city: string;
+    role?: 'acheteur' | 'vendeur' | 'admin';
     neighborhood?: string;
     avatar?: string;
   }): Promise<void> => {
@@ -534,7 +538,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       
       const newUserData = {
         id: user.uid,
+        uid: user.uid,
         name: data.name,
+        displayName: data.name,
+        role: data.role || 'acheteur',
         phone: data.phone,
         email: data.email,
         whatsapp: data.phone.replace(/[^0-9]/g, ''),
@@ -1084,6 +1091,59 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     showToast('Statut du compte utilisateur mis à jour.', 'info');
   };
 
+  const adminDeleteUser = async (userId: string, email?: string): Promise<void> => {
+    const targetId = userId.trim();
+    if (!targetId) return;
+
+    // Instant UI state update
+    setAllUsers(prev => prev.filter(u => u.id !== targetId && (u as any).uid !== targetId));
+    setListings(prev => prev.filter(l => l.sellerId !== targetId));
+
+    try {
+      if (!targetId.startsWith('seller-') && !targetId.startsWith('admin-')) {
+        await deleteDoc(doc(db, 'users', targetId));
+      }
+      showToast(`Compte utilisateur ${email || targetId} supprimé avec succès !`, 'success');
+    } catch (err: any) {
+      console.warn('Erreur suppression Firestore user:', err);
+      showToast(`Compte ${email || targetId} supprimé localement.`, 'info');
+    }
+  };
+
+  const refreshUsersFromFirestore = async (): Promise<void> => {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      if (!snap.empty) {
+        const fetchedUsers = snap.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            name: data.name || data.displayName || 'Utilisateur SamaDeal',
+            displayName: data.displayName || data.name,
+            email: data.email || '',
+            role: data.role || 'acheteur',
+            phone: data.phone || '+221 77 000 00 00',
+            whatsapp: data.whatsapp || '221770000000',
+            city: data.city || 'Dakar',
+            neighborhood: data.neighborhood || '',
+            avatar: data.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+            rating: data.rating || 5.0,
+            reviewCount: data.reviewCount || 0,
+            memberSince: data.memberSince || 'Récemment',
+            emailVerified: data.emailVerified || false,
+            whatsappVerified: data.whatsappVerified || false,
+            responseTime: data.responseTime || '< 15 min',
+            totalSales: data.totalSales || 0
+          } as Seller;
+        });
+        setAllUsers(fetchedUsers);
+      }
+      showToast('Liste des utilisateurs actualisée depuis Cloud Firestore.', 'info');
+    } catch (err) {
+      console.warn('Erreur lors de l\'actualisation des utilisateurs depuis Firestore:', err);
+    }
+  };
+
   const adminDeleteListing = (listingId: string) => {
     setListings(prev => prev.filter(l => l.id !== listingId));
     showToast('Annonce supprimée du catalogue.', 'warning');
@@ -1185,6 +1245,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         logoutAdmin,
         toggleUserVerification,
         toggleUserBlocked,
+        adminDeleteUser,
+        refreshUsersFromFirestore,
         adminDeleteListing,
         adminToggleBoost,
         releaseEscrowFunds,

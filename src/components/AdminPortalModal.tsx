@@ -41,6 +41,8 @@ export const AdminPortalModal: React.FC = () => {
     resolveReport, 
     toggleUserVerification,
     toggleUserBlocked,
+    adminDeleteUser,
+    refreshUsersFromFirestore,
     adminDeleteListing,
     adminToggleBoost,
     releaseEscrowFunds,
@@ -423,6 +425,25 @@ export const AdminPortalModal: React.FC = () => {
           {/* TAB 3: USERS & SELLERS */}
           {activeTab === 'users' && (
             <div className="space-y-4">
+              {/* Header card with Admin banner */}
+              <div className="bg-white rounded-xl shadow-xs p-4 border-l-4 border-red-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    🛡️ Panneau d'Administration Suprême - SamaDeal
+                  </h4>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Espace restreint et sécurisé. Vous disposez des droits absolus de gestion et de modération sur Cloud Firestore.
+                  </p>
+                </div>
+                <button
+                  onClick={() => refreshUsersFromFirestore()}
+                  className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition flex items-center gap-1.5 shrink-0"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Actualiser la liste (Firestore)</span>
+                </button>
+              </div>
+
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="relative flex-1 max-w-sm">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -445,11 +466,10 @@ export const AdminPortalModal: React.FC = () => {
                     <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4">Utilisateur</th>
-                        <th className="py-3 px-3">Contact</th>
-                        <th className="py-3 px-3">Localisation</th>
-                        <th className="py-3 px-3">Note & Ventes</th>
+                        <th className="py-3 px-3">Contact / Email</th>
+                        <th className="py-3 px-3">Rôle</th>
                         <th className="py-3 px-3">Badge Vérifié</th>
-                        <th className="py-3 px-3 text-right">Actions Admin</th>
+                        <th className="py-3 px-3 text-right">Actions de Modération</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -465,33 +485,27 @@ export const AdminPortalModal: React.FC = () => {
                               <div>
                                 <div className="flex items-center gap-1.5 font-bold text-slate-900">
                                   <span>{user.name}</span>
-                                  {user.role === 'admin' && (
-                                    <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-black rounded">
-                                      PROPRIÉTAIRE
-                                    </span>
-                                  )}
-                                  {user.isBlocked && (
-                                    <span className="px-1.5 py-0.2 bg-red-100 text-red-800 text-[9px] font-bold rounded">
-                                      BLOQUÉ
-                                    </span>
-                                  )}
                                 </div>
-                                <div className="text-[10px] text-slate-400">
-                                  Membre depuis {user.memberSince}
+                                <div className="text-[10px] text-slate-400 font-mono">
+                                  UID: {user.id}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-3">
-                            <div className="font-semibold text-slate-700">{user.phone}</div>
-                            <div className="text-[10px] text-slate-400">{user.email || 'Non renseigné'}</div>
-                          </td>
-                          <td className="py-3 px-3 text-slate-600">
-                            {user.city}
+                            <div className="font-semibold text-slate-700">{user.email || 'Non renseigné'}</div>
+                            <div className="text-[10px] text-slate-400">{user.phone}</div>
                           </td>
                           <td className="py-3 px-3">
-                            <div className="text-amber-600 font-bold">★ {user.rating}</div>
-                            <div className="text-[10px] text-slate-400">{user.totalSales} ventes</div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              user.role === 'admin'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : user.role === 'vendeur'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {user.role || 'acheteur'}
+                            </span>
                           </td>
                           <td className="py-3 px-3">
                             <button
@@ -507,18 +521,33 @@ export const AdminPortalModal: React.FC = () => {
                             </button>
                           </td>
                           <td className="py-3 px-3 text-right">
-                            {user.role !== 'admin' && (
+                            <div className="flex items-center justify-end gap-2">
+                              {user.role !== 'admin' && (
+                                <button
+                                  onClick={() => toggleUserBlocked(user.id)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                                    user.isBlocked
+                                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                      : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+                                  }`}
+                                >
+                                  {user.isBlocked ? 'Débloquer' : 'Suspendre'}
+                                </button>
+                              )}
+                              
                               <button
-                                onClick={() => toggleUserBlocked(user.id)}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                                  user.isBlocked
-                                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                }`}
+                                onClick={async () => {
+                                  const targetUid = user.id || (user as any).uid || '';
+                                  if (window.confirm(`⚠️ ATTENTION : Voulez-vous vraiment supprimer définitivement le compte de ${user.email || user.name} ? Cette action est irréversible.`)) {
+                                    await adminDeleteUser(targetUid, user.email || user.name);
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition shadow-xs flex items-center gap-1 cursor-pointer"
                               >
-                                {user.isBlocked ? 'Débloquer' : 'Suspendre'}
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Supprimer le compte</span>
                               </button>
-                            )}
+                            </div>
                           </td>
                         </tr>
                       ))}

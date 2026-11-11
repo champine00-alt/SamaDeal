@@ -20,9 +20,10 @@ export interface Category {
 export interface Seller {
   id: string;
   name: string;
+  displayName?: string;
   email?: string;
   password?: string;
-  role?: 'user' | 'admin';
+  role?: 'acheteur' | 'vendeur' | 'admin' | 'user';
   avatar: string;
   phone: string;
   whatsapp: string;

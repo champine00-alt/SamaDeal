@@ -53,6 +53,7 @@ export const AuthModal: React.FC = () => {
 
   // Step 1: Identification & Securite
   const [regName, setRegName] = useState('');
+  const [regRole, setRegRole] = useState<'acheteur' | 'vendeur'>('acheteur');
   const [regPhone, setRegPhone] = useState('77 452 89 12');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -74,6 +75,7 @@ export const AuthModal: React.FC = () => {
   const [forgotIdentifier, setForgotIdentifier] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isResetStepPassword, setIsResetStepPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Avatar presets
   const AVATAR_PRESETS = [
@@ -158,16 +160,22 @@ export const AuthModal: React.FC = () => {
 
   const handleFinalRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const fullPhone = regPhone.startsWith('+221') ? regPhone : `+221 ${regPhone}`;
-    await registerUser({
-      name: regName.trim(),
-      phone: fullPhone,
-      email: regEmail.trim(),
-      password: regPassword,
-      city: regCity,
-      neighborhood: regNeighborhood.trim(),
-      avatar: regAvatar
-    });
+    setIsSubmitting(true);
+    try {
+      const fullPhone = regPhone.startsWith('+221') ? regPhone : `+221 ${regPhone}`;
+      await registerUser({
+        name: regName.trim(),
+        role: regRole,
+        phone: fullPhone,
+        email: regEmail.trim(),
+        password: regPassword,
+        city: regCity,
+        neighborhood: regNeighborhood.trim(),
+        avatar: regAvatar
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
@@ -242,6 +250,8 @@ export const AuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      {/* Container invisible pour Firebase Phone Auth reCAPTCHA */}
+      <div id="recaptcha-container"></div>
       <div 
         className="bg-white rounded-3xl max-w-lg w-full max-h-[94vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden"
         onClick={e => e.stopPropagation()}
@@ -448,10 +458,10 @@ export const AuthModal: React.FC = () => {
               {/* STEP 1 FORM: IDENTIFICATION & DEUX-FACTEURS */}
               {regStep === 1 && (
                 <form onSubmit={handleNextStep1} className="space-y-3.5">
-                  {/* Nom complet */}
+                  {/* Nom complet / Boutique */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Nom et prénom <span className="text-rose-500">*</span>
+                      Nom complet ou nom de Boutique <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -460,11 +470,42 @@ export const AuthModal: React.FC = () => {
                       <input
                         type="text"
                         required
-                        placeholder="Ex: Aminata Sall ou Ousmane Diallo"
+                        placeholder="Ex: Boutique Dakar High-Tech ou Aminata Sall"
                         value={regName}
                         onChange={e => setRegName(e.target.value)}
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                       />
+                    </div>
+                  </div>
+
+                  {/* Choix du Rôle (Acheteur vs Vendeur) */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Je souhaite m'inscrire en tant que :
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/90 rounded-xl border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => setRegRole('acheteur')}
+                        className={`py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                          regRole === 'acheteur'
+                            ? 'bg-white text-emerald-800 shadow-sm border border-emerald-300'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>🛍️ Acheteur</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRegRole('vendeur')}
+                        className={`py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                          regRole === 'vendeur'
+                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>🏪 Vendeur / Partenaire</span>
+                      </button>
                     </div>
                   </div>
 
@@ -671,24 +712,33 @@ export const AuthModal: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Submit with WhatsApp Branded Button */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setRegStep(1)}
-                      className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1 transition"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Retour</span>
-                    </button>
+                  {/* Submit Button & Back Action */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRegStep(1)}
+                        className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1 transition shrink-0"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Retour</span>
+                      </button>
 
-                    <button
-                      type="submit"
-                      className="flex-1 py-3 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs rounded-xl shadow-lg shadow-[#25D366]/25 flex items-center justify-center gap-2 transition active:scale-[0.99]"
-                    >
-                      <WhatsAppIcon className="w-4.5 h-4.5" />
-                      <span>Finaliser et recevoir le code WhatsApp</span>
-                    </button>
+                      <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span>{isSubmitting ? "Envoi en cours..." : "Finaliser et recevoir l'e-mail de confirmation"}</span>
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-center text-slate-500 mt-2">
+                      Un lien de vérification sera envoyé à votre adresse e-mail.
+                    </p>
                   </div>
                 </form>
               )}
