@@ -80,15 +80,6 @@ export const Header: React.FC = () => {
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               Sécurité & Conseils
             </button>
-            <button 
-              onClick={() => {
-                setActiveTab('profile');
-                setIsProfileModalOpen(true);
-              }}
-              className="hover:text-emerald-600 transition-colors whitespace-nowrap shrink-0"
-            >
-              Paiement Wave & OM
-            </button>
           </nav>
 
           {/* Zone 3: Primary action + quick triggers */}
