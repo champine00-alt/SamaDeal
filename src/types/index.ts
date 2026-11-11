@@ -31,8 +31,8 @@ export interface Seller {
   rating: number;
   reviewCount: number;
   memberSince: string;
-  isVerified: boolean;
-  isPhoneVerified?: boolean;
+  emailVerified: boolean;
+  whatsappVerified: boolean;
   twoFactorEnabled?: boolean;
   responseTime: string;
   totalSales: number;

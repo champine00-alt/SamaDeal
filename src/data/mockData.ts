@@ -102,7 +102,8 @@ export const ADMIN_USER: Seller = {
   rating: 5.0,
   reviewCount: 99,
   memberSince: 'Fondateur',
-  isVerified: true,
+  emailVerified: true,
+  whatsappVerified: true,
   responseTime: '< 1 min',
   totalSales: 120
 };
@@ -121,8 +122,8 @@ export const CURRENT_USER: Seller = {
   rating: 4.9,
   reviewCount: 14,
   memberSince: 'Mars 2024',
-  isVerified: true,
-  isPhoneVerified: true,
+  emailVerified: true,
+  whatsappVerified: true,
   twoFactorEnabled: false,
   responseTime: '< 15 min',
   totalSales: 8
@@ -176,7 +177,8 @@ export const INITIAL_SELLERS: Record<string, Seller> = {
     rating: 4.95,
     reviewCount: 38,
     memberSince: 'Janvier 2023',
-    isVerified: true,
+    emailVerified: true,
+    whatsappVerified: true,
     responseTime: '< 10 min',
     totalSales: 29
   },
@@ -190,7 +192,8 @@ export const INITIAL_SELLERS: Record<string, Seller> = {
     rating: 5.0,
     reviewCount: 22,
     memberSince: 'Novembre 2023',
-    isVerified: true,
+    emailVerified: true,
+    whatsappVerified: true,
     responseTime: '< 5 min',
     totalSales: 19
   },
@@ -204,7 +207,8 @@ export const INITIAL_SELLERS: Record<string, Seller> = {
     rating: 4.8,
     reviewCount: 17,
     memberSince: 'Février 2024',
-    isVerified: true,
+    emailVerified: true,
+    whatsappVerified: true,
     responseTime: '< 30 min',
     totalSales: 11
   },
@@ -218,7 +222,8 @@ export const INITIAL_SELLERS: Record<string, Seller> = {
     rating: 4.7,
     reviewCount: 9,
     memberSince: 'Mai 2024',
-    isVerified: false,
+    emailVerified: false,
+    whatsappVerified: false,
     responseTime: '< 1 heure',
     totalSales: 5
   }

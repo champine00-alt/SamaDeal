@@ -103,7 +103,7 @@ const MarketplaceContent: React.FC = () => {
         // Toggles
         if (onlyNegotiable && !item.isNegotiable) return false;
         if (onlyDelivered && !item.hasDelivery) return false;
-        if (onlyVerified && !item.seller.isVerified) return false;
+        if (onlyVerified && !item.seller.emailVerified) return false;
 
         return true;
       })

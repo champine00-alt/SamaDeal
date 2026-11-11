@@ -106,7 +106,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
               <div className="font-medium truncate max-w-[80px]">{listing.seller.name.split(' ')[0]}</div>
               <div className="text-[10px] text-amber-600 font-semibold">★ {listing.seller.rating}</div>
             </div>
-            {listing.seller.isVerified && (
+            {listing.seller.emailVerified && (
               <span title="Vendeur vérifié">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               </span>

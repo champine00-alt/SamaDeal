@@ -229,7 +229,7 @@ export const AdminPortalModal: React.FC = () => {
                     {allUsers.length}
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    {allUsers.filter(u => u.isVerified).length} vendeurs vérifiés
+                    {allUsers.filter(u => u.emailVerified).length} vendeurs vérifiés
                   </p>
                 </div>
               </div>
@@ -497,13 +497,13 @@ export const AdminPortalModal: React.FC = () => {
                             <button
                               onClick={() => toggleUserVerification(user.id)}
                               className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors ${
-                                user.isVerified
+                                user.emailVerified
                                   ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
                               <ShieldCheck className="w-3.5 h-3.5" />
-                              <span>{user.isVerified ? 'Vérifié' : 'Non vérifié'}</span>
+                              <span>{user.emailVerified ? 'Vérifié' : 'Non vérifié'}</span>
                             </button>
                           </td>
                           <td className="py-3 px-3 text-right">

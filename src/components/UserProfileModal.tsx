@@ -27,8 +27,10 @@ import {
   Smartphone,
   ExternalLink,
   DollarSign,
-  ChevronRight
+  ChevronRight,
+  Mail
 } from 'lucide-react';
+import { WhatsAppIcon } from './common/WhatsAppIcon';
 import { useApp } from '../context/AppContext';
 import { SENEGAL_CITIES } from '../data/mockData';
 
@@ -69,7 +71,8 @@ export const UserProfileModal: React.FC = () => {
     deleteUserAccount,
     logoutUser,
     openAuthModal,
-    showToast
+    showToast,
+    resendVerificationEmail
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<AccountTab>('profile');
@@ -207,7 +210,7 @@ export const UserProfileModal: React.FC = () => {
                   alt={currentUser.name} 
                   className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-sm"
                 />
-                {currentUser.isVerified && (
+                {(currentUser.emailVerified || currentUser.whatsappVerified) && (
                   <div className="absolute -bottom-1 -right-1 bg-emerald-600 text-white rounded-full p-0.5" title="Compte vérifié">
                     <Check className="w-3 h-3" />
                   </div>
@@ -471,7 +474,7 @@ export const UserProfileModal: React.FC = () => {
                 <div className="text-center sm:text-left flex-1">
                   <div className="flex items-center justify-center sm:justify-start gap-2">
                     <h4 className="text-lg font-bold text-slate-900">{currentUser.name}</h4>
-                    {currentUser.isVerified && (
+                    {(currentUser.emailVerified || currentUser.whatsappVerified) && (
                       <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                         <ShieldCheck className="w-3.5 h-3.5" />
                         Identité vérifiée
@@ -513,6 +516,34 @@ export const UserProfileModal: React.FC = () => {
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-center">
                   <div className="text-lg font-bold text-rose-600">{myFavoriteListings.length}</div>
                   <div className="text-[11px] text-slate-500">Coups de cœur</div>
+                </div>
+              </div>
+
+              {/* Verification Status */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <Mail className={`w-5 h-5 ${currentUser.emailVerified ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <span className="text-xs font-semibold">E-mail ({currentUser.email})</span>
+                  </div>
+                  {currentUser.emailVerified ? (
+                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Vérifié</span>
+                  ) : (
+                    <button onClick={resendVerificationEmail} className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded hover:bg-amber-200">
+                      Renvoyer vérification
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <WhatsAppIcon className={`w-5 h-5 ${currentUser.whatsappVerified ? 'text-[#25D366]' : 'text-slate-400'}`} />
+                    <span className="text-xs font-semibold">WhatsApp ({currentUser.phone})</span>
+                  </div>
+                  {currentUser.whatsappVerified ? (
+                    <span className="text-[11px] font-bold text-emerald-800 bg-[#E7FFDB] px-2 py-0.5 rounded">Vérifié</span>
+                  ) : (
+                    <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">En attente de Twilio</span>
+                  )}
                 </div>
               </div>
 

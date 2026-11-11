@@ -196,7 +196,7 @@ export const ListingDetailModal: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-sm text-slate-900">{selectedListing.seller.name}</span>
-                        {selectedListing.seller.isVerified && (
+                        {selectedListing.seller.emailVerified && (
                           <span title="Vendeur vérifié">
                             <ShieldCheck className="w-4 h-4 text-emerald-600" />
                           </span>
