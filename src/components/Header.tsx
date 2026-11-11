@@ -84,17 +84,6 @@ export const Header: React.FC = () => {
 
           {/* Zone 3: Primary action + quick triggers */}
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Exclusive Admin Space Button - only visible to champine00@gmail.com */}
-            {isAdminAuthenticated && (
-              <button
-                onClick={() => setIsAdminModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/30 transition-all shadow-sm"
-                title="Espace Administrateur Réservé à champine00@gmail.com"
-              >
-                <span>👑</span>
-                <span className="hidden sm:inline">Espace Admin</span>
-              </button>
-            )}
 
             {/* Mobile Simulator Toggle on Desktop */}
             <button

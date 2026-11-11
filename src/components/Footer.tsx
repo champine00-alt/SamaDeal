@@ -99,17 +99,6 @@ export const Footer: React.FC = () => {
               <li>
                 <span className="text-slate-400">Transactions protégées par séquestre</span>
               </li>
-              {isAdminAuthenticated && (
-                <li>
-                  <button 
-                    onClick={() => setIsAdminModalOpen(true)}
-                    className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors flex items-center gap-1.5"
-                  >
-                    <span>👑</span>
-                    <span>Console Administrateur</span>
-                  </button>
-                </li>
-              )}
             </ul>
           </div>
 

@@ -11,7 +11,7 @@ export const AdminAuthModal: React.FC = () => {
   } = useApp();
 
   const [email, setEmail] = useState(superAdminEmail);
-  const [pin, setPin] = useState('2026');
+  const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
 
   if (!isAdminAuthModalOpen) return null;
@@ -35,15 +35,19 @@ export const AdminAuthModal: React.FC = () => {
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-2xl bg-slate-900 text-emerald-400 flex items-center justify-center shadow-lg mb-4 ring-4 ring-emerald-500/20">
-            <Lock className="w-7 h-7" />
+          <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-lg mb-4 ring-4 ring-emerald-500/20 p-1 flex items-center justify-center">
+            <img 
+              src="/assets/aistudio/photo_2026-11-11_08-30-01_efa7b2df.jpg" 
+              alt="SamaDeal Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
 
           <h3 className="text-xl font-black text-slate-950 tracking-tight">
-            Espace Propriétaire & Admin
+            Espace Propriétaire Verrouillé
           </h3>
           <p className="text-xs text-slate-500 mt-1 max-w-xs">
-            Accès sécurisé et confidentiel, exclusivement réservé au propriétaire de l'application.
+            Espace restreint. Saisissez votre mot de passe administrateur pour déverrouiller.
           </p>
         </div>
 
@@ -64,8 +68,7 @@ export const AdminAuthModal: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center justify-between">
-              <span>Code de sécurité PIN</span>
-              <span className="text-[10px] text-emerald-600 font-normal">Code maître : 2026</span>
+              <span>Mot de passe administrateur</span>
             </label>
             <div className="relative">
               <input
@@ -73,7 +76,7 @@ export const AdminAuthModal: React.FC = () => {
                 required
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="2026"
+                placeholder="Mot de passe secrètement configuré"
                 className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono font-bold tracking-widest focus:bg-white focus:outline-none focus:border-emerald-600"
               />
               <button

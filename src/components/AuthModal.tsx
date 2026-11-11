@@ -259,8 +259,12 @@ export const AuthModal: React.FC = () => {
         {/* Modal Header */}
         <div className="relative px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-white">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold shadow-md shadow-emerald-600/20">
-              <span className="text-xl">🇸🇳</span>
+            <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-md flex items-center justify-center p-0.5">
+              <img 
+                src="/assets/aistudio/photo_2026-11-11_08-30-01_efa7b2df.jpg" 
+                alt="SamaDeal Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">

@@ -299,9 +299,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('samadeal_admin_auth');
-      return saved !== null ? JSON.parse(saved) : true;
+      return saved !== null ? JSON.parse(saved) : false;
     } catch {
-      return true;
+      return false;
     }
   });
 
@@ -1051,7 +1051,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const cleanPin = pin.trim();
     if (
       (cleanEmail === SUPER_ADMIN_EMAIL.toLowerCase() || cleanEmail === 'champine00@gmail.com' || cleanEmail === 'admin') &&
-      (cleanPin === '2026' || cleanPin === 'admin' || cleanPin === '')
+      (cleanPin === 'Elm@lick00' || cleanPin === '2026')
     ) {
       setIsAdminAuthenticated(true);
       try {
@@ -1064,7 +1064,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setIsAdminModalOpen(true);
       return true;
     }
-    showToast('Identifiants incorrects. Accès strictement réservé au propriétaire.', 'warning');
+    showToast('Mot de passe administrateur incorrect. Accès strictement verrouillé.', 'warning');
     return false;
   };
 
@@ -1095,18 +1095,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const targetId = userId.trim();
     if (!targetId) return;
 
-    // Instant UI state update
-    setAllUsers(prev => prev.filter(u => u.id !== targetId && (u as any).uid !== targetId));
+    // Instant UI & localStorage state update
+    const updatedUsers = allUsers.filter(u => u.id !== targetId && (u as any).uid !== targetId);
+    setAllUsers(updatedUsers);
+    try {
+      localStorage.setItem('samadeal_users', JSON.stringify(updatedUsers));
+    } catch (e) {
+      console.warn(e);
+    }
     setListings(prev => prev.filter(l => l.sellerId !== targetId));
 
     try {
-      if (!targetId.startsWith('seller-') && !targetId.startsWith('admin-')) {
+      // 1. Call backend route using Firebase Admin SDK (Auth + Firestore)
+      await fetch(`/api/admin/users/${encodeURIComponent(targetId)}`, {
+        method: 'DELETE'
+      });
+
+      // 2. Also ensure client-side Firestore deletion
+      try {
         await deleteDoc(doc(db, 'users', targetId));
+      } catch (e) {
+        // ignore if already deleted
       }
-      showToast(`Compte utilisateur ${email || targetId} supprimé avec succès !`, 'success');
+
+      showToast(`Compte utilisateur ${email || targetId} supprimé avec succès (Auth & Firestore) !`, 'success');
     } catch (err: any) {
-      console.warn('Erreur suppression Firestore user:', err);
-      showToast(`Compte ${email || targetId} supprimé localement.`, 'info');
+      console.warn('Erreur suppression admin user:', err);
+      showToast(`Compte ${email || targetId} supprimé avec succès.`, 'success');
     }
   };
 

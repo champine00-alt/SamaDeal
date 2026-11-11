@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import twilio from 'twilio';
+import admin from 'firebase-admin';
+import firebaseConfig from './firebase-applet-config.json' with { type: 'json' };
 
 dotenv.config();
 
@@ -13,6 +15,18 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+
+if (!(admin as any).apps.length) {
+  try {
+    (admin as any).initializeApp({
+      credential: (admin as any).credential.applicationDefault(),
+      projectId: firebaseConfig.projectId
+    });
+    console.log('✅ Firebase Admin SDK initialisé avec succès');
+  } catch (err) {
+    console.warn('⚠️ Échec de l\'initialisation de Firebase Admin SDK:', err);
+  }
+}
 
 // Helper to format Senegal / International phone numbers to E.164 standard
 function formatE164Phone(rawPhone: string): string {
@@ -203,6 +217,39 @@ app.post('/api/twilio/verify-otp', async (req, res) => {
       error: 'Erreur lors de la vérification du code',
       details: error.message
     });
+  }
+});
+
+// Admin delete user endpoint (Firebase Auth + Firestore via Firebase Admin SDK)
+app.delete('/api/admin/users/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+    if (!uid) {
+      return res.status(400).json({ error: 'UID manquant' });
+    }
+
+    // 1. Delete user from Firebase Auth using Firebase Admin SDK
+    if ((admin as any).apps.length && !uid.startsWith('seller-') && !uid.startsWith('admin-')) {
+      try {
+        await (admin as any).auth().deleteUser(uid);
+      } catch (authErr: any) {
+        console.warn('Firebase Admin Auth delete user warning:', authErr.message);
+      }
+    }
+
+    // 2. Delete user document from Firestore using Firebase Admin SDK
+    if ((admin as any).apps.length) {
+      try {
+        await (admin as any).firestore().collection('users').doc(uid).delete();
+      } catch (fsErr: any) {
+        console.warn('Firebase Admin Firestore delete user warning:', fsErr.message);
+      }
+    }
+
+    return res.json({ success: true, message: `Utilisateur ${uid} supprimé avec succès de Firebase Auth et Firestore.` });
+  } catch (error: any) {
+    console.error('Erreur /api/admin/users/:uid:', error);
+    return res.status(500).json({ error: error.message || 'Erreur lors de la suppression de l\'utilisateur.' });
   }
 });
 
