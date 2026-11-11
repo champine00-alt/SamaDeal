@@ -1,0 +1,6 @@
+{
+  "name": "SamaDeal - Vente & Achat d'Occasion au Sénégal",
+  "description": "Application mobile et web de vente et d'achat d'articles d'occasion entre particuliers au Sénégal. Achète, vends et économise avec paiement Wave et Orange Money.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
